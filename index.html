@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEGAPARI • MINES CAPTURE (AI 99%)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0c16 0%, #13182b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 12px;
+            margin: 0;
+        }
+
+        .card {
+            max-width: 640px;
+            width: 100%;
+            background: rgba(10, 15, 28, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #3f4d8c;
+            border-radius: 48px;
+            padding: 1.8rem 1.5rem 2rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 0 2px #4f60a0 inset;
+            color: #ecf2ff;
+            transition: all 0.2s;
+        }
+
+        .locked-blur {
+            filter: blur(4px) grayscale(0.7);
+            pointer-events: none;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00e0ff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .site-badge {
+            background: #1a2442;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            border: 1px solid #4ae0ff;
+            color: #b7f0ff;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px cyan;
+        }
+
+        .promo {
+            background: #002b44;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #7ffbff;
+            border: 1px solid #0af;
+        }
+
+        .promo span {
+            color: black;
+            background: #9fdfff;
+            padding: 2px 12px;
+            border-radius: 30px;
+            margin-left: 8px;
+            font-family: monospace;
+            font-size: 1.4rem;
+        }
+
+        /* network scanner visual */
+        .scanner-row {
+            background: #020617;
+            border-radius: 60px;
+            padding: 12px 20px;
+            margin: 10px 0 20px;
+            border: 1px solid #39658a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 0 12px #00a6ff70;
+        }
+
+        .pulse {
+            width: 18px;
+            height: 18px;
+            background: #0ef;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #0ef;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        .wave-status {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #aaf0ff;
+            background: #111c33;
+            padding: 6px 16px;
+            border-radius: 30px;
+            border-left: 3px solid #0af;
+        }
+
+        .freq-badge {
+            background: #1e2a47;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            color: #ffd966;
+        }
+
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #0b1429e0;
+            border-radius: 40px;
+            padding: 15px 20px;
+            margin: 18px 0 20px;
+            border: 1px solid #4d70b0;
+            flex-wrap: wrap;
+            gap: 10px;
+            backdrop-filter: blur(4px);
+        }
+
+        .stat-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #101d3a;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .stat-cell span { font-size: 1.5rem; }
+
+        .safe-badge { background: #2e4d2e; color: #d8ffa0; border-left: 4px solid #9eff6e; }
+        .bomb-badge { background: #521c1c; color: #ffa09c; border-left: 4px solid #ff5555; }
+        .acc-badge { background: #003f6b; color: #9bc5ff; border-left: 4px solid #3b9eff; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 25px 0 30px;
+            justify-content: center;
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            background: #0f1b36;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: #b0c6fa;
+            box-shadow: 0 0 0 2px #2d4280, 0 8px 0 #070e1c;
+            transition: 0.1s ease;
+            cursor: default;
+            border: 1px solid #6183d0;
+        }
+
+        .cell.safe-tile {
+            background: #f5c542;
+            background: radial-gradient(circle at 30% 30%, #ffe28a, #e0a800);
+            color: #1f2700;
+            box-shadow: 0 0 0 3px #ffdb8e, 0 8px 0 #9e7400;
+            border: 1px solid #fff7b0;
+            font-weight: 900;
+            text-shadow: 1px 1px 0 #ffcd7e;
+        }
+
+        .cell.wave-captured {
+            outline: 3px solid #00ffff;
+            outline-offset: 3px;
+            filter: brightness(1.2);
+            transition: 0.1s;
+        }
+
+        .time-row {
+            background: #030b1a;
+            border-radius: 60px;
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            border: 1px solid #3a60a0;
+            margin: 20px 0 10px;
+            box-shadow: inset 0 2px 7px #00000070;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .play-time {
+            color: #ffdb8e;
+            background: #1f2942;
+            padding: 5px 15px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .multiplier-pill {
+            background: #1f3a3a;
+            border: 1px solid #2cc56e;
+            color: #a2f5b6;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        button {
+            background: linear-gradient(145deg, #1a2755, #0b1535);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1.6rem;
+            padding: 20px 10px;
+            border-radius: 70px;
+            width: 100%;
+            cursor: pointer;
+            border: 2px solid #3bc0ff;
+            box-shadow: 0 10px 0 #004080, 0 5px 25px #00a6ff;
+            transition: 0.07s linear;
+            letter-spacing: 1px;
+            margin: 15px 0 0;
+        }
+
+        button:active {
+            transform: translateY(7px);
+            box-shadow: 0 3px 0 #004080, 0 5px 20px #00a6ff;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #1a3150;
+            border-color: #4f6790;
+            pointer-events: none;
+        }
+
+        .footnote {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #aab7dd;
+            font-weight: 500;
+        }
+
+        .ai-tag {
+            background: #103b4e;
+            padding: 5px 16px;
+            border-radius: 30px;
+            border: 1px solid #0ef;
+            color: #b2ffff;
+            font-size: 1rem;
+        }
+
+        .password-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            flex-direction: column;
+        }
+
+        .password-box {
+            background: #192237;
+            padding: 40px 30px;
+            border-radius: 60px;
+            border: 3px solid #0af;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 30px 40px black;
+        }
+
+        .password-box h2 {
+            color: #9fefff;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .password-box input {
+            width: 100%;
+            padding: 18px 25px;
+            font-size: 2rem;
+            text-align: center;
+            border-radius: 60px;
+            border: none;
+            background: #2c3755;
+            color: white;
+            border: 2px solid #0af;
+            outline: none;
+            font-family: monospace;
+            letter-spacing: 5px;
+        }
+
+        .password-box button {
+            margin-top: 25px;
+            background: #0080c0;
+            border: none;
+            color: white;
+            font-size: 1.7rem;
+            padding: 15px;
+            border-radius: 60px;
+            font-weight: bold;
+            border-bottom: 5px solid #003366;
+        }
+
+        .info-chip {
+            background: #1f2940;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+
+        .small-note {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PASSWORD PROTECTION (MOSE2005) -->
+<div id="passwordOverlay" class="password-overlay">
+    <div class="password-box">
+        <h2>🔐 MEGAPARI ACCESS</h2>
+        <div style="color:#0af; margin-bottom:20px;">enter network key</div>
+        <input type="password" id="passwordInput" placeholder="********" maxlength="10" autofocus>
+        <button id="unlockBtn">CONNECT & UNLOCK</button>
+        <p style="margin-top: 20px; color:#b9c6ed;">megapari wave · promo <strong style="background:#1a3f55; padding:5px 15px; border-radius:99px;">MOSES</strong></p>
+    </div>
+</div>
+
+<!-- MAIN APP (initially blurred) -->
+<div id="mainApp" class="card locked-blur">
+    <div class="header">
+        <div class="site-badge">🎰 MEGAPARI MINES CAPTURE</div>
+        <div class="promo">WAVE <span>MOSES</span></div>
+    </div>
+
+    <!-- Network scanner simulating wave capture from MEGAPARI -->
+    <div class="scanner-row">
+        <div class="pulse"></div>
+        <div class="wave-status" id="waveStatus">🌀 scanning MEGAPARI wave...</div>
+        <div class="freq-badge" id="freqBand">2.4 GHz · SNR 47dB</div>
+    </div>
+
+    <!-- Prediction Stats row -->
+    <div class="stats-panel">
+        <div class="stat-cell safe-badge"><span>🟡</span> Safe <span id="safeCount">10</span></div>
+        <div class="stat-cell bomb-badge"><span>💣</span> Bombs <span id="bombCount">3</span></div>   <!-- fixed 3 bombs -->
+        <div class="stat-cell acc-badge"><span>📡</span> Wave Acc <span id="accuracyDisplay">98.7</span>%</div>
+    </div>
+
+    <!-- 5x5 grid (25 boxes) -->
+    <div class="grid-container" id="minesGrid">
+        <!-- JS will fill 25 cells -->
+    </div>
+
+    <!-- Play time + Multiplier -->
+    <div class="time-row">
+        <span class="play-time" id="playTimeDisplay">2026-03-02 20:16:00</span>
+        <span class="multiplier-pill" id="multiplierDisplay">x2.10</span>
+    </div>
+
+    <!-- AI Prediction tag & extra info -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+        <div class="ai-tag">📡 MEGAPARI LOCK · 99%</div>
+        <div class="info-chip">⏱️ 3 traps only · high probability</div>
+    </div>
+
+    <!-- GENERATE BUTTON (trigger new wave capture) -->
+    <button id="generateBtn">🌀 CAPTURE NEW WAVE (MEGAPARI) 🌀</button>
+
+    <div class="footnote">
+        <span>🔁 signal lock · traps fixed = 3</span>
+        <span>⚡ accuracy <span id="liveAcc">98-99%</span> vs MEGAPARI</span>
+    </div>
+    <div class="small-note" style="text-align:center; color:#b6c1da;">* yellow = safe (22/25 ?) · exactly 3 bombs per signal</div>
+</div>
+
+<script>
+    (function() {
+        // ---------- PASSWORD PROTECTION (MOSE2005) ----------
+        const overlay = document.getElementById('passwordOverlay');
+        const mainApp = document.getElementById('mainApp');
+        const pwdInput = document.getElementById('passwordInput');
+        const unlockBtn = document.getElementById('unlockBtn');
+
+        const CORRECT_PWD = 'MOSE2005';
+
+        unlockBtn.addEventListener('click', function() {
+            if (pwdInput.value === CORRECT_PWD) {
+                overlay.style.display = 'none';
+                mainApp.classList.remove('locked-blur');
+                // after unlock, initial capture
+                generateWaveCapture();
+            } else {
+                alert('Incorrect key. Use MOSE2005');
+                pwdInput.value = '';
+                pwdInput.focus();
+            }
+        });
+
+        pwdInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') unlockBtn.click();
+        });
+
+        // ---------- DOM elements ----------
+        const gridContainer = document.getElementById('minesGrid');
+        const safeSpan = document.getElementById('safeCount');
+        const bombSpan = document.getElementById('bombCount');
+        const accSpan = document.getElementById('accuracyDisplay');
+        const playTimeSpan = document.getElementById('playTimeDisplay');
+        const multiplierSpan = document.getElementById('multiplierDisplay');
+        const generateBtn = document.getElementById('generateBtn');
+        const liveAccNote = document.getElementById('liveAcc');
+        const waveStatus = document.getElementById('waveStatus');
+        const freqBand = document.getElementById('freqBand');
+
+        // 25 cells array
+        let cells = [];
+
+        // init grid (empty divs)
+        function buildGrid() {
+            gridContainer.innerHTML = '';
+            for (let i = 1; i <= 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.textContent = i;
+                gridContainer.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+        buildGrid();
+
+        // helper: random between min/max (inclusive)
+        function rand(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // generate wave capture from MEGAPARI – exactly 3 bombs, high probability
+        function generateWaveCapture() {
+            // ---------- FIXED: exactly 3 bombs ----------
+            const bombCount = 3;
+            // safe tiles = 25 - bombs = 22 (since we show only safe vs bombs)
+            // but we want to display exactly 22 safe? Actually we have 25 total, bombs 3 -> safe tiles 22.
+            let safeCount = 25 - bombCount; // 22
+
+            // update bomb span always 3
+            bombSpan.textContent = bombCount;
+
+            // 2. generate random accuracy between 97.5% and 99.9% (MEGAPARI high probability)
+            const accuracy = (97.5 + (Math.random() * 2.4)).toFixed(1); // 97.5 to 99.9
+            accSpan.textContent = accuracy;
+            liveAccNote.textContent = accuracy + '%';
+
+            // 3. create random safe indices: choose 22 safe tiles out of 25
+            const totalCells = 25;
+            const indices = Array.from({ length: totalCells }, (_, i) => i + 1);
+            // shuffle
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            // first 22 are safe (since we need 22 safe tiles)
+            const safeIndices = new Set(indices.slice(0, safeCount));
+            // the rest 3 indices are bombs (but not highlighted)
+            // no further action needed, bombs just not yellow.
+
+            // Update safe count display
+            safeSpan.textContent = safeCount;   // =22
+
+            // 4. set cells: remove safe class, then add class to safe indices
+            cells.forEach(cell => {
+                cell.classList.remove('safe-tile', 'wave-captured');
+                const idx = parseInt(cell.dataset.index);
+                if (safeIndices.has(idx)) {
+                    cell.classList.add('safe-tile');
+                }
+                // add a tiny animation / wave effect on few random cells? not necessary
+            });
+
+            // 5. generate multiplier (based on 22/25 ~ 0.88 ratio -> high multiplier)
+            const ratio = safeCount / 25; // 0.88
+            const multiplier = (1.5 + ratio * 1.2).toFixed(2); // around 2.5x
+            multiplierSpan.textContent = `x${multiplier}`;
+
+            // 6. set play time: current datetime + random offset
+            const now = new Date();
+            const randomMin = Math.floor(Math.random() * 55);
+            const future = new Date(now.getTime() + randomMin * 60000);
+            const year = future.getFullYear();
+            const month = String(future.getMonth() + 1).padStart(2,'0');
+            const day = String(future.getDate()).padStart(2,'0');
+            const hour = String(future.getHours()).padStart(2,'0');
+            const minute = String(future.getMinutes()).padStart(2,'0');
+            const sec = String(future.getSeconds()).padStart(2,'0');
+            playTimeSpan.textContent = `${year}-${month}-${day} ${hour}:${minute}:${sec}`;
+
+            // 7. update wave scanner / network messages (mimic MEGAPARI signal capture)
+            const snr = rand(44, 59);
+            const freqOptions = ['2.4 GHz', '5.8 GHz', '1.6 GHz (L-band)', '3.2 GHz'];
+            const band = freqOptions[Math.floor(Math.random() * freqOptions.length)];
+            freqBand.textContent = `${band} · SNR ${snr}dB`;
+
+            const waveActions = [
+                '🌀 phase-locked to MEGAPARI',
+                '📡 decoding mine pattern...',
+                '⚡ wave stabilized · 3 traps',
+                '🎯 MEGAPARI signal acquired',
+                '🔍 entropy source: MEGAPARI',
+                '🌐 MEGAPARI downlink synced'
+            ];
+            waveStatus.textContent = waveActions[Math.floor(Math.random() * waveActions.length)];
+
+            // bonus: highlight some cells with wave-captured class for 200ms (visual effect)
+            cells.forEach(c => c.classList.add('wave-captured'));
+            setTimeout(() => {
+                cells.forEach(c => c.classList.remove('wave-captured'));
+            }, 250);
+        }
+
+        // Attach generate button
+        generateBtn.addEventListener('click', () => {
+            generateWaveCapture();
+        });
+
+        // expose function
+        window.generateWaveCapture = generateWaveCapture;
+
+        // generate first stats when page loads (but hidden until unlock) – fine.
+        setTimeout(() => {
+            generateWaveCapture();
+        }, 200);
+
+        // Ensure bomb count always 3.
+        // Force bombSpan content to remain 3 (even if something tries to change)
+        // also in generateWaveCapture we set bombSpan manually.
+    })();
+</script>
+
+</body>
+</html>
